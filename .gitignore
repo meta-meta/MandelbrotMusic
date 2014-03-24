@@ -6,4 +6,6 @@
 *.ear
 classes
 bin
-.idea
+
+.idea/workspace.xml
+.idea/tasks.xml

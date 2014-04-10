@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/ProcessingBlank.iml" filepath="$PROJECT_DIR$/ProcessingBlank.iml" />
       <module fileurl="file://C:/Dev Tools/processing/core/core.iml" filepath="C:/Dev Tools/processing/core/core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../_Libraries/JavaOSC/modules/core/src/main/main.iml" filepath="$PROJECT_DIR$/../_Libraries/JavaOSC/modules/core/src/main/main.iml" />
       <module fileurl="file://$PROJECT_DIR$/../_Libraries/processing/core/processing-core.iml" filepath="$PROJECT_DIR$/../_Libraries/processing/core/processing-core.iml" />
     </modules>
   </component>

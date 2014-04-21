@@ -16,7 +16,7 @@ public class Main extends PApplet {
     static int maxMandelbrotIters = 1024;
     static int hilbertN = 128; // hilbertN must be power of 2 in order to be square  \
     static int getHilbertDMax() {
-        return hilbertN * hilbertN - 1;
+        return hilbertN * hilbertN;
     }
 
     List<HilbertWithMandelbrot> hilbertCoordsAndMandelbrotVals = new ArrayList<>();

@@ -11,73 +11,69 @@ import java.util.List;
 
 
 public class Main extends PApplet {
-    boolean redrawHilbertMandelbrot;
+    OSCPortOut oscPortOut;
 
     static int maxMandelbrotIters = 1024;
-    static int hilbertN = 128; // hilbertN must be power of 2  \
-
-    List<HilbertWithMandelbrot> hilbertCoordsAndMandelbrotVals = new ArrayList<>();
-    float zoom = 1f;
-    float shiftX = 0f, shiftY = 0f;
-
-    int getHilbertDMax() {
+    static int hilbertN = 128; // hilbertN must be power of 2 in order to be square  \
+    static int getHilbertDMax() {
         return hilbertN * hilbertN - 1;
     }
 
+    List<HilbertWithMandelbrot> hilbertCoordsAndMandelbrotVals = new ArrayList<>();
+    float zoom = 1f;
+    float panX = 0f, panY = 0f;
 
-    OSCPortOut oscPortOut;
+    static boolean redrawHilbertMandelbrot;
+    static boolean renderAsHilbertCurve = true;
+
     public Main(){
         super();
 
-        try
-        {
+        try {
             oscPortOut = new OSCPortOut();
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             System.out.print(e);
         }
     }
 
-    public static void main(String[] args){
-		PApplet.main(new String[] { /*"--present",*/ Main.class.getCanonicalName() });
-	}
-
     private void sendOscMsg(String address, int note) {
         OSCMessage msg = new OSCMessage(address, Arrays.asList((Object) note));
-        try
-        {
+        try {
             oscPortOut.send(msg);
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             System.out.println("Couldn't send");
         }
     }
 
+    public static void main(String[] args){
+		PApplet.main(new String[] { "--present", Main.class.getCanonicalName() });
+	}
+
     @Override
-	public void setup() {		
-		size(1050, 720, PApplet.OPENGL);
+	public void setup() {
+//		size(1050, 720, PApplet.OPENGL);
+		size(displayWidth, displayHeight, PApplet.OPENGL);
 
         background(0);
         colorMode(HSB);
 
-//        drawMandelbrot(this, 0, 0, width, height, shiftX, shiftY, zoom, maxMandelbrotIters);
-
+//        drawMandelbrot(this, 0, 0, width, height, panX, panY, zoom, maxMandelbrotIters);
         generateAndDrawHilbertMandelbrot(getHilbertDMax());
     }
 
+    // TODO: create a more universal note sequence generating system to share amongst projects
     private void generateNoteList()
     {
         List<Integer> major = Arrays.asList(2, 2, 1, 2, 2, 2, 1);
         List<Integer> wholeTone = Arrays.asList(2);
 
-        int n = 11;
+        int n = 32;
 //        notes = Arrays.asList(n);     throws unsupported operation when adding int. WTF??
         notes = new ArrayList<>();
         notes.add(n);
-        for (int i = 0; i < maxMandelbrotIters; i++)
+        for (int i = 0; i < maxMandelbrotIters && n < 64; i++)
         {
+//            n += 1;
             n += major.get(i % major.size());
             notes.add(n);
         }
@@ -89,52 +85,15 @@ public class Main extends PApplet {
         {
             for (int y = 0; y < h; y++)
             {
-                int iter = getMandelbrotVal(x / (float) w, y / (float) h, shiftX, shiftY, zoom);
+                int iter = Mandelbrot.getValFromNormalizedCoordinates(x / (float) w, y / (float) h, shiftX, shiftY, zoom, maxIters);
 
                 p5.stroke(getMandelbrotHue(iter), 200, getMandelbrotBrightness(iter));
                 p5.point(x0 + x, y0 + y);
             }
         }
-        //        For each pixel (Px, Py) on the screen, do:
-//        {
-//            x0 = scaled x coordinate of pixel (scaled to lie in the Mandelbrot X scale (-2.5, 1))
-//            y0 = scaled y coordinate of pixel (scaled to lie in the Mandelbrot Y scale (-1, 1))
-//
-//            x = 0.0
-//            y = 0.0
-//            iteration = 0
-//            max_iteration = 1000
-//            while ( x*x + y*y < 2*2  AND  iteration < max_iteration )
-//            {
-//                xtemp = x*x - y*y + x0
-//                y = 2*x*y + y0
-//                x = xtemp
-//                iteration = iteration + 1
-//            }
-//            color = palette[iteration]
-//            plot(Px, Py, color)
-//        }
+
     }
 
-
-    private static int getMandelbrotVal(float x0, float y0, float shiftX, float shiftY, float zoom) {
-        float x = 0.5f - shiftX + (x0 - 0.5f) / zoom;
-        float y = 0.5f - shiftY + (y0 - 0.5f) / zoom;
-
-        Vec v = Mandelbrot.getDenormalizedVec(x, y);
-        return Mandelbrot.getVal(v.x, v.y, maxMandelbrotIters);
-    }
-
-    class HilbertWithMandelbrot {
-        Vec coordinate;
-        int mandelbrotVal;
-
-        HilbertWithMandelbrot(Vec coordinate, int mandelbrotVal)
-        {
-            this.coordinate = coordinate;
-            this.mandelbrotVal = mandelbrotVal;
-        }
-    }
 
     private void generateAndDrawHilbertMandelbrot(int dMax)
     {
@@ -155,7 +114,7 @@ public class Main extends PApplet {
         float largestSide = sqrt(maxA/dMax);
         int s = getSideLength(dMax, w, h, largestSide);
         int x = 0, y = 0;
-        for (int d = 1; d < dMax; d++)
+        for (int d = 0; d < dMax; d++)
         {
             p5.stroke(64);
             p5.strokeWeight(s > 2 ? 1 : 0);
@@ -245,7 +204,7 @@ public class Main extends PApplet {
         for (int d = 0; d < dMax; d++)
         {
             Vec v = Hilbert.distanceToVector(hilbertN, d);
-            coordsWithVals.add(new HilbertWithMandelbrot(v, getMandelbrotVal(v.x / hilbertN, v.y / hilbertN, shiftX, shiftY, zoom)));
+            coordsWithVals.add(new HilbertWithMandelbrot(v, Mandelbrot.getValFromNormalizedCoordinates(v.x / hilbertN, v.y / hilbertN, panX, panY, zoom, maxMandelbrotIters)));
         }
         return coordsWithVals;
     }
@@ -272,7 +231,6 @@ public class Main extends PApplet {
             playing = !playing;
         }
 
-        System.out.println(e.getKeyCode());
         if(e.getKeyCode() == KeyEvent.VK_PAGE_UP) {
             if(e.isControlDown()){
                 hilbertN *= 2;
@@ -284,7 +242,7 @@ public class Main extends PApplet {
 
         if(e.getKeyCode() == KeyEvent.VK_PAGE_DOWN) {
             if(e.isControlDown()){
-                hilbertN = hilbertN > 1 ? hilbertN /2 : hilbertN;
+                hilbertN = hilbertN > 1 ? hilbertN / 2 : hilbertN;
             } else {
                 zoom = zoom > 1 ? zoom / 2 : zoom;
             }
@@ -292,22 +250,22 @@ public class Main extends PApplet {
         }
 
         if(e.getKeyCode() == KeyEvent.VK_UP) {
-            shiftY += 0.1f / zoom;
+            panY += 0.1f / zoom;
             redrawHilbertMandelbrot = true;
         }
 
         if(e.getKeyCode() == KeyEvent.VK_DOWN) {
-            shiftY -= 0.1f / zoom;
+            panY -= 0.1f / zoom;
             redrawHilbertMandelbrot = true;
         }
 
         if(e.getKeyCode() == KeyEvent.VK_LEFT) {
-            shiftX += 0.1f / zoom;
+            panX += 0.1f / zoom;
             redrawHilbertMandelbrot = true;
         }
 
         if(e.getKeyCode() == KeyEvent.VK_RIGHT) {
-            shiftX -= 0.1f / zoom;
+            panX -= 0.1f / zoom;
             redrawHilbertMandelbrot = true;
         }
 
@@ -321,7 +279,40 @@ public class Main extends PApplet {
             redrawHilbertMandelbrot = true;
         }
 
-        System.out.println("zoom: " + zoom + " shiftX: " + shiftX + " shiftY: " + shiftY);
+        if(e.getKeyCode() == KeyEvent.VK_H) {
+            renderAsHilbertCurve = !renderAsHilbertCurve;
+            redrawHilbertMandelbrot = true;
+        }
+
+        if(e.getKeyCode() == KeyEvent.VK_PERIOD) {
+            int dec = 10;
+
+            if(e.isControlDown()) {
+                dec /= 10;
+            }
+
+            if(e.isShiftDown()) {
+                dec *= 10;
+            }
+
+            delay = delay > 1 ? delay - dec : delay;
+        }
+
+        if(e.getKeyCode() == KeyEvent.VK_COMMA) {
+            int inc = 10;
+
+            if(e.isControlDown()) {
+                inc /= 10;
+            }
+
+            if(e.isShiftDown()) {
+                inc *= 10;
+            }
+
+            delay += inc;
+        }
+
+        System.out.println("zoom: " + zoom + " panX: " + panX + " panY: " + panY);
         System.out.println("maxIters: " + maxMandelbrotIters);
 
 
@@ -335,8 +326,12 @@ public class Main extends PApplet {
         if(redrawHilbertMandelbrot)
         {
             background(0);
-            generateAndDrawHilbertMandelbrot(getHilbertDMax());
-//            drawMandelbrot(this, 0, 0, width, height, shiftX, shiftY, zoom, maxMandelbrotIters);
+            if(renderAsHilbertCurve){
+                generateAndDrawHilbertMandelbrot(getHilbertDMax());
+            }
+            else {
+                drawMandelbrot(this, 0, 0, width, height, panX, panY, zoom, maxMandelbrotIters);
+            }
 
             redrawHilbertMandelbrot = false;
         }
@@ -364,6 +359,23 @@ public class Main extends PApplet {
             float sx = ((width / 2) / ((float) hilbertN)), sy = (height / (float) hilbertN);
             strokeWeight(10);
             point(v.x * sx, v.y * sy);
+
+
+            coordAndVal = hilbertCoordsAndMandelbrotVals.get((t + 4) % hilbertCoordsAndMandelbrotVals.size());
+            val = coordAndVal.mandelbrotVal;
+
+            sendOscMsg("/noteBass", val == maxMandelbrotIters ? -1000 : notes.get(val % notes.size()));
+
+            // draw the note coord we're playing
+            v = coordAndVal.coordinate;
+            stroke(0, 0, 255, 150);
+            sx = ((width / 2) / ((float) hilbertN));
+            sy = (height / (float) hilbertN);
+            strokeWeight(10);
+            point(v.x * sx, v.y * sy);
+
+
+
 
             t++;
             millisAtPlayed = millis();
@@ -405,4 +417,15 @@ public class Main extends PApplet {
 //        line(a.x * s, a.y * s, b.x * s, b.y * s);
 
 	}
+
+    class HilbertWithMandelbrot {
+        Vec coordinate;
+        int mandelbrotVal;
+
+        HilbertWithMandelbrot(Vec coordinate, int mandelbrotVal)
+        {
+            this.coordinate = coordinate;
+            this.mandelbrotVal = mandelbrotVal;
+        }
+    }
 }

@@ -2,6 +2,9 @@ package com.generalprocessingunit.processing;
 
 public class Hilbert
 {
+
+//    TODO: get distanceToVector based on percentage of maxD so that the Hilbert cursor stays in the same place when changing Hilbert resolutions
+//    TODO: also click the screen to set the cursor so need a function to convert x,y to hilbert distance
     static Vec distanceToVector(int size, int distance)
     {
         Vec v = new Vec();

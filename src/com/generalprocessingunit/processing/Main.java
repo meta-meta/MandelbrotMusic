@@ -136,23 +136,22 @@ public class Main extends PApplet {
         }
     }
 
-    private static void drawHilbertMandelbrot(PApplet p5, int x0, int y0, int w, int h, List<HilbertWithMandelbrot> coordsWithVals)
-    {
-        for (int d = 1; d < coordsWithVals.size(); d++)
-        {
-            p5.strokeWeight(2);
-            p5.stroke(getMandelbrotHue(d, coordsWithVals), 255, getMandelbrotBrightness(d, coordsWithVals));
-            drawHilbertSegment(p5, x0, y0, w, h, d, coordsWithVals);
+    private static void drawHilbertMandelbrot(PApplet p5, int x0, int y0, int w, int h, List<HilbertWithMandelbrot> coordsWithVals) {
+        p5.strokeWeight(2);
+        p5.stroke(60);
+
+        for (int d = 0; d < coordsWithVals.size(); d++) {
+            p5.fill(getMandelbrotHue(d, coordsWithVals), 255, getMandelbrotBrightness(d, coordsWithVals));
+            drawHilbertCoordinate(p5, x0, y0, w, h, coordsWithVals.get(d).coordinate);
         }
     }
 
-    private static void drawHilbertSegment(PApplet p5, int x, int y, int w, int h, int d, List<HilbertWithMandelbrot> coordsWithVals)
-    {
-        Vec a = coordsWithVals.get(d - 1).coordinate;
-        Vec b = coordsWithVals.get(d).coordinate;
 
-        float scaleX = w / (float) hilbertN, scaleY = h / (float) hilbertN;
-        p5.line(x + a.x * scaleX, y + a.y * scaleY, x + b.x * scaleX, y + b.y * scaleY);
+    private static void drawHilbertCoordinate(PApplet p5, int x0, int y0, int w, int h, Vec hilbertCoord)
+    {
+        float scaleX = w / (float) hilbertN;
+        float scaleY = h / (float) hilbertN;
+        p5.rect(x0 + hilbertCoord.x * scaleX, y0 + hilbertCoord.y * scaleY, scaleX, scaleY);
     }
 
     private static int getMandelbrotBrightness(int d, List<HilbertWithMandelbrot> coordsWithVals)
@@ -172,7 +171,7 @@ public class Main extends PApplet {
 
     private static int getMandelbrotHue(int val)
     {
-        return val % 256;
+        return val % 255;
     }
 
     private static int getSideLength(int dMax, int w, int h, float largestSide)
@@ -321,7 +320,6 @@ public class Main extends PApplet {
 
     @Override
 	public void draw(){
-        blendMode(REPLACE);
 
         if(redrawHilbertMandelbrot)
         {
@@ -334,10 +332,10 @@ public class Main extends PApplet {
             }
 
             redrawHilbertMandelbrot = false;
+            t = 0;
         }
 
-        blendMode(ADD);
-        colorMode(HSB);
+
 
         if(millis() - millisAtPlayed > delay){
             if(!playing) {
@@ -355,24 +353,35 @@ public class Main extends PApplet {
 
             // draw the note coord we're playing
             Vec v = coordAndVal.coordinate;
-            stroke(0, 0, 255, 150);
-            float sx = ((width / 2) / ((float) hilbertN)), sy = (height / (float) hilbertN);
-            strokeWeight(10);
-            point(v.x * sx, v.y * sy);
+//            stroke(0, 0, 255, 150);
+//            if((t / hilbertCoordsAndMandelbrotVals.size()) % 2 == 0) {
+//                noStroke();
+//                stroke(255, 150);
+//            } else {
+//                stroke(127);
+//                fill(getMandelbrotHue(val), 255, getMandelbrotBrightness(val));
+//            }
+            strokeWeight(3);
+            stroke( 90 * (t / hilbertCoordsAndMandelbrotVals.size()) % 255, 127, 255);
+            noFill();
+            drawHilbertCoordinate(this, 0, 0, width / 2, height, v);
+//            float sx = ((width / 2) / ((float) hilbertN)), sy = (height / (float) hilbertN);
+//            strokeWeight(10);
+//            point(v.x * sx, v.y * sy);
 
 
-            coordAndVal = hilbertCoordsAndMandelbrotVals.get((t + 4) % hilbertCoordsAndMandelbrotVals.size());
-            val = coordAndVal.mandelbrotVal;
-
-            sendOscMsg("/noteBass", val == maxMandelbrotIters ? -1000 : notes.get(val % notes.size()));
-
-            // draw the note coord we're playing
-            v = coordAndVal.coordinate;
-            stroke(0, 0, 255, 150);
-            sx = ((width / 2) / ((float) hilbertN));
-            sy = (height / (float) hilbertN);
-            strokeWeight(10);
-            point(v.x * sx, v.y * sy);
+//            coordAndVal = hilbertCoordsAndMandelbrotVals.get((t + 4) % hilbertCoordsAndMandelbrotVals.size());
+//            val = coordAndVal.mandelbrotVal;
+//
+//            sendOscMsg("/noteBass", val == maxMandelbrotIters ? -1000 : notes.get(val % notes.size()));
+//
+//            // draw the note coord we're playing
+//            v = coordAndVal.coordinate;
+//            stroke(0, 0, 255, 150);
+//            sx = ((width / 2) / ((float) hilbertN));
+//            sy = (height / (float) hilbertN);
+//            strokeWeight(10);
+//            point(v.x * sx, v.y * sy);
 
 
 

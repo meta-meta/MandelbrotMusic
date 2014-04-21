@@ -1,5 +1,9 @@
 package com.generalprocessingunit.processing;
 
+import processing.core.PApplet;
+
+import java.util.List;
+
 /** This class is derived from Wikipedia's pseudocode.
  *
  *  <pre>
@@ -27,6 +31,35 @@ package com.generalprocessingunit.processing;
 public class Mandelbrot {
 
     /**
+     * Draws the Mandelbrot Set to the screen
+     * @param p5 PApplet instance
+     * @param width
+     * @param height
+     * @param panX
+     * @param panY
+     * @param zoom
+     * @param maxIters
+     */
+    public static void draw(PApplet p5, int width, int height, double panX, double panY, double zoom, int maxIters) {
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                int iter = Mandelbrot.getValFromNormalizedCoordinates(x / (float) width, y / (float) height, panX, panY, zoom, maxIters);
+
+                p5.stroke(getHue(iter), 200, getBrightness(iter, maxIters));
+                p5.point(x, y);
+            }
+        }
+    }
+
+    public static int getBrightness(int val, int maxIters) {
+        return val == maxIters ? 0 : 255;
+    }
+
+    public static int getHue(int val) {
+        return val % 255;
+    }
+
+    /**
      * Returns the number of iterations required to escape the Mandelbrot set at the given coordinates
      * @param x normalized x coordinate 0 to 1.0
      * @param y normalized y coordinate 0 to 1.0
@@ -36,9 +69,9 @@ public class Mandelbrot {
      * @param maxIterations
      * @return
      */
-    public static int getValFromNormalizedCoordinates(float x, float y, float panX, float panY, float zoom, int maxIterations) {
-        float x1 = 0.5f - panX + (x - 0.5f) / zoom;
-        float y1 = 0.5f - panY + (y - 0.5f) / zoom;
+    public static int getValFromNormalizedCoordinates(double x, double y, double panX, double panY, double zoom, int maxIterations) {
+        double x1 = 0.5f - panX + (x - 0.5f) / zoom;
+        double y1 = 0.5f - panY + (y - 0.5f) / zoom;
 
         Vec v = getDenormalizedCoordinates(x1, y1);
         return getVal(v.x, v.y, maxIterations);
@@ -52,7 +85,7 @@ public class Mandelbrot {
      * @param y normalized y coordinate 0 to 1.0
      * @return
      */
-    public static Vec getDenormalizedCoordinates(float x, float y) {
+    public static Vec getDenormalizedCoordinates(double x, double y) {
         return new Vec(
             -2.5f + x * 3.5f,
             -1f + y * 2f
@@ -66,13 +99,13 @@ public class Mandelbrot {
      * @param maxIterations
      * @return
      */
-    public static int getVal(float scaledX, float scaledY, int maxIterations) {
+    public static int getVal(double scaledX, double scaledY, int maxIterations) {
 
-        float x = 0f, y = 0f;
+        double x = 0f, y = 0f;
         int iter = 0;
 
         while (x * x + y * y < 4 && iter < maxIterations) {
-            float xTemp = x * x - y * y + scaledX;
+            double xTemp = x * x - y * y + scaledX;
             y = 2 * x * y + scaledY;
             x = xTemp;
             iter++;

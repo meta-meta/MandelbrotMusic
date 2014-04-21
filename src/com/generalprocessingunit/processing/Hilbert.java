@@ -33,7 +33,7 @@ public class Hilbert
             }
 
             //Swap x and y
-            float temp = v.x;
+            double temp = v.x;
             v.x = v.y;
             v.y = temp;
         }

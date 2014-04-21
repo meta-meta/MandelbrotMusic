@@ -1,11 +1,11 @@
 package com.generalprocessingunit.processing;
 
 class Vec {
-    float x, y;
+    double x, y;
 
     Vec(){}
 
-    Vec(float x, float y)
+    Vec(double x, double y)
     {
         this.x = x;
         this.y = y;

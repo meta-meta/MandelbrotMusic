@@ -15,6 +15,7 @@ public class Main extends PApplet {
 
     static int maxMandelbrotIters = 1024;
     static int hilbertN = 128; // hilbertN must be power of 2 in order to be square  \
+
     static int getHilbertDMax() {
         return hilbertN * hilbertN;
     }
@@ -26,7 +27,7 @@ public class Main extends PApplet {
     static boolean redrawHilbertMandelbrot;
     static boolean renderAsHilbertCurve = true;
 
-    public Main(){
+    public Main() {
         super();
 
         try {
@@ -45,14 +46,14 @@ public class Main extends PApplet {
         }
     }
 
-    public static void main(String[] args){
-		PApplet.main(new String[] { "--present", Main.class.getCanonicalName() });
-	}
+    public static void main(String[] args) {
+        PApplet.main(new String[]{"--present", Main.class.getCanonicalName()});
+    }
 
     @Override
-	public void setup() {
+    public void setup() {
 //		size(1050, 720, PApplet.OPENGL);
-		size(displayWidth, displayHeight, PApplet.OPENGL);
+        size(displayWidth, displayHeight, PApplet.OPENGL);
 
         background(0);
         colorMode(HSB);
@@ -62,8 +63,7 @@ public class Main extends PApplet {
     }
 
     // TODO: create a more universal note sequence generating system to share amongst projects
-    private void generateNoteList()
-    {
+    private void generateNoteList() {
         List<Integer> major = Arrays.asList(2, 2, 1, 2, 2, 2, 1);
         List<Integer> wholeTone = Arrays.asList(2);
 
@@ -71,8 +71,7 @@ public class Main extends PApplet {
 //        notes = Arrays.asList(n);     throws unsupported operation when adding int. WTF??
         notes = new ArrayList<>();
         notes.add(n);
-        for (int i = 0; i < maxMandelbrotIters && n < 64; i++)
-        {
+        for (int i = 0; i < maxMandelbrotIters && n < 64; i++) {
 //            n += 1;
             n += major.get(i % major.size());
             notes.add(n);
@@ -80,23 +79,17 @@ public class Main extends PApplet {
     }
 
     private static void drawMandelbrot(PApplet p5, int x0, int y0, int w, int h, float shiftX, float shiftY, float zoom, int maxIters) {
-
-        for (int x = 0; x < w; x++)
-        {
-            for (int y = 0; y < h; y++)
-            {
+        for (int x = 0; x < w; x++) {
+            for (int y = 0; y < h; y++) {
                 int iter = Mandelbrot.getValFromNormalizedCoordinates(x / (float) w, y / (float) h, shiftX, shiftY, zoom, maxIters);
 
                 p5.stroke(getMandelbrotHue(iter), 200, getMandelbrotBrightness(iter));
                 p5.point(x0 + x, y0 + y);
             }
         }
-
     }
 
-
-    private void generateAndDrawHilbertMandelbrot(int dMax)
-    {
+    private void generateAndDrawHilbertMandelbrot(int dMax) {
         List<HilbertWithMandelbrot> coordsWithVals = generateHilbertMandelbrot(dMax);
         hilbertCoordsAndMandelbrotVals = coordsWithVals;
 
@@ -107,15 +100,13 @@ public class Main extends PApplet {
         generateNoteList();  // TODO: only generate if maxMandelbrotIters increased
     }
 
-    private static void drawLinearizedValues(PApplet p5, int x0, int y0, int w, int h, List<HilbertWithMandelbrot> coordsWithVals)
-    {
+    private static void drawLinearizedValues(PApplet p5, int x0, int y0, int w, int h, List<HilbertWithMandelbrot> coordsWithVals) {
         int dMax = coordsWithVals.size();
         float maxA = w * h;
-        float largestSide = sqrt(maxA/dMax);
+        float largestSide = sqrt(maxA / dMax);
         int s = getSideLength(dMax, w, h, largestSide);
         int x = 0, y = 0;
-        for (int d = 0; d < dMax; d++)
-        {
+        for (int d = 0; d < dMax; d++) {
             p5.stroke(64);
             p5.strokeWeight(s > 2 ? 1 : 0);
             p5.fill(getMandelbrotHue(d, coordsWithVals), 255, getMandelbrotBrightness(d, coordsWithVals));
@@ -124,12 +115,9 @@ public class Main extends PApplet {
 //            y = ((d * s) / (w - s)) * s;    // must have to do with s not dividing equally into w
             p5.rect(x0 + x, y0 + y, s, s);
 
-            if (w >= x + 2 * s)
-            {
+            if (w >= x + 2 * s) {
                 x += s;
-            }
-            else
-            {
+            } else {
                 x = 0;
                 y += s;
             }
@@ -147,41 +135,33 @@ public class Main extends PApplet {
     }
 
 
-    private static void drawHilbertCoordinate(PApplet p5, int x0, int y0, int w, int h, Vec hilbertCoord)
-    {
+    private static void drawHilbertCoordinate(PApplet p5, int x0, int y0, int w, int h, Vec hilbertCoord) {
         float scaleX = w / (float) hilbertN;
         float scaleY = h / (float) hilbertN;
         p5.rect(x0 + hilbertCoord.x * scaleX, y0 + hilbertCoord.y * scaleY, scaleX, scaleY);
     }
 
-    private static int getMandelbrotBrightness(int d, List<HilbertWithMandelbrot> coordsWithVals)
-    {
+    private static int getMandelbrotBrightness(int d, List<HilbertWithMandelbrot> coordsWithVals) {
         return getMandelbrotBrightness(coordsWithVals.get(d).mandelbrotVal);
     }
 
-    private static int getMandelbrotBrightness(int val)
-    {
+    private static int getMandelbrotBrightness(int val) {
         return val == maxMandelbrotIters ? 0 : 255;
     }
 
-    private static int getMandelbrotHue(int d, List<HilbertWithMandelbrot> coordsWithVals)
-    {
+    private static int getMandelbrotHue(int d, List<HilbertWithMandelbrot> coordsWithVals) {
         return getMandelbrotHue(coordsWithVals.get(d).mandelbrotVal);
     }
 
-    private static int getMandelbrotHue(int val)
-    {
+    private static int getMandelbrotHue(int val) {
         return val % 255;
     }
 
-    private static int getSideLength(int dMax, int w, int h, float largestSide)
-    {
+    private static int getSideLength(int dMax, int w, int h, float largestSide) {
         int s = 0;
-        for (int i = 1; i < w; i++)
-        {
+        for (int i = 1; i < w; i++) {
             s = (int) (w / (float) i);
-            if (s > largestSide)
-            {
+            if (s > largestSide) {
                 continue;
             }
 
@@ -189,19 +169,16 @@ public class Main extends PApplet {
             int rows = dMax / sqPerRow;
             int leftover = dMax % sqPerRow;
 
-            if (rows * s + (leftover > 0 ? s : 0) <= h)
-            {
+            if (rows * s + (leftover > 0 ? s : 0) <= h) {
                 break;
             }
         }
         return s;
     }
 
-    private List<HilbertWithMandelbrot> generateHilbertMandelbrot(int dMax)
-    {
+    private List<HilbertWithMandelbrot> generateHilbertMandelbrot(int dMax) {
         List<HilbertWithMandelbrot> coordsWithVals = new ArrayList<>();
-        for (int d = 0; d < dMax; d++)
-        {
+        for (int d = 0; d < dMax; d++) {
             Vec v = Hilbert.distanceToVector(hilbertN, d);
             coordsWithVals.add(new HilbertWithMandelbrot(v, Mandelbrot.getValFromNormalizedCoordinates(v.x / hilbertN, v.y / hilbertN, panX, panY, zoom, maxMandelbrotIters)));
         }
@@ -224,14 +201,13 @@ public class Main extends PApplet {
     boolean playing = false;
 
     @Override
-    public void keyPressed(KeyEvent e)
-    {
-        if(e.getKeyCode() == KeyEvent.VK_SPACE) {
+    public void keyPressed(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_SPACE) {
             playing = !playing;
         }
 
-        if(e.getKeyCode() == KeyEvent.VK_PAGE_UP) {
-            if(e.isControlDown()){
+        if (e.getKeyCode() == KeyEvent.VK_PAGE_UP) {
+            if (e.isControlDown()) {
                 hilbertN *= 2;
             } else {
                 zoom *= 2;
@@ -239,8 +215,8 @@ public class Main extends PApplet {
             redrawHilbertMandelbrot = true;
         }
 
-        if(e.getKeyCode() == KeyEvent.VK_PAGE_DOWN) {
-            if(e.isControlDown()){
+        if (e.getKeyCode() == KeyEvent.VK_PAGE_DOWN) {
+            if (e.isControlDown()) {
                 hilbertN = hilbertN > 1 ? hilbertN / 2 : hilbertN;
             } else {
                 zoom = zoom > 1 ? zoom / 2 : zoom;
@@ -248,63 +224,63 @@ public class Main extends PApplet {
             redrawHilbertMandelbrot = true;
         }
 
-        if(e.getKeyCode() == KeyEvent.VK_UP) {
+        if (e.getKeyCode() == KeyEvent.VK_UP) {
             panY += 0.1f / zoom;
             redrawHilbertMandelbrot = true;
         }
 
-        if(e.getKeyCode() == KeyEvent.VK_DOWN) {
+        if (e.getKeyCode() == KeyEvent.VK_DOWN) {
             panY -= 0.1f / zoom;
             redrawHilbertMandelbrot = true;
         }
 
-        if(e.getKeyCode() == KeyEvent.VK_LEFT) {
+        if (e.getKeyCode() == KeyEvent.VK_LEFT) {
             panX += 0.1f / zoom;
             redrawHilbertMandelbrot = true;
         }
 
-        if(e.getKeyCode() == KeyEvent.VK_RIGHT) {
+        if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
             panX -= 0.1f / zoom;
             redrawHilbertMandelbrot = true;
         }
 
-        if(e.getKeyCode() == KeyEvent.VK_HOME) {
+        if (e.getKeyCode() == KeyEvent.VK_HOME) {
             maxMandelbrotIters = maxMandelbrotIters > 2 ? maxMandelbrotIters / 2 : maxMandelbrotIters;
             redrawHilbertMandelbrot = true;
         }
 
-        if(e.getKeyCode() == KeyEvent.VK_END) {
+        if (e.getKeyCode() == KeyEvent.VK_END) {
             maxMandelbrotIters = maxMandelbrotIters * 2;
             redrawHilbertMandelbrot = true;
         }
 
-        if(e.getKeyCode() == KeyEvent.VK_H) {
+        if (e.getKeyCode() == KeyEvent.VK_H) {
             renderAsHilbertCurve = !renderAsHilbertCurve;
             redrawHilbertMandelbrot = true;
         }
 
-        if(e.getKeyCode() == KeyEvent.VK_PERIOD) {
+        if (e.getKeyCode() == KeyEvent.VK_PERIOD) {
             int dec = 10;
 
-            if(e.isControlDown()) {
+            if (e.isControlDown()) {
                 dec /= 10;
             }
 
-            if(e.isShiftDown()) {
+            if (e.isShiftDown()) {
                 dec *= 10;
             }
 
             delay = delay > 1 ? delay - dec : delay;
         }
 
-        if(e.getKeyCode() == KeyEvent.VK_COMMA) {
+        if (e.getKeyCode() == KeyEvent.VK_COMMA) {
             int inc = 10;
 
-            if(e.isControlDown()) {
+            if (e.isControlDown()) {
                 inc /= 10;
             }
 
-            if(e.isShiftDown()) {
+            if (e.isShiftDown()) {
                 inc *= 10;
             }
 
@@ -319,15 +295,13 @@ public class Main extends PApplet {
     }
 
     @Override
-	public void draw(){
+    public void draw() {
 
-        if(redrawHilbertMandelbrot)
-        {
+        if (redrawHilbertMandelbrot) {
             background(0);
-            if(renderAsHilbertCurve){
+            if (renderAsHilbertCurve) {
                 generateAndDrawHilbertMandelbrot(getHilbertDMax());
-            }
-            else {
+            } else {
                 drawMandelbrot(this, 0, 0, width, height, panX, panY, zoom, maxMandelbrotIters);
             }
 
@@ -336,9 +310,8 @@ public class Main extends PApplet {
         }
 
 
-
-        if(millis() - millisAtPlayed > delay){
-            if(!playing) {
+        if (millis() - millisAtPlayed > delay) {
+            if (!playing) {
                 sendOscMsg("/volume", 0);
                 return;
             }
@@ -362,7 +335,7 @@ public class Main extends PApplet {
 //                fill(getMandelbrotHue(val), 255, getMandelbrotBrightness(val));
 //            }
             strokeWeight(3);
-            stroke( 90 * (t / hilbertCoordsAndMandelbrotVals.size()) % 255, 127, 255);
+            stroke(90 * (t / hilbertCoordsAndMandelbrotVals.size()) % 255, 127, 255);
             noFill();
             drawHilbertCoordinate(this, 0, 0, width / 2, height, v);
 //            float sx = ((width / 2) / ((float) hilbertN)), sy = (height / (float) hilbertN);
@@ -382,8 +355,6 @@ public class Main extends PApplet {
 //            sy = (height / (float) hilbertN);
 //            strokeWeight(10);
 //            point(v.x * sx, v.y * sy);
-
-
 
 
             t++;
@@ -425,14 +396,13 @@ public class Main extends PApplet {
 //        stroke(millis()%256, 200, 200);
 //        line(a.x * s, a.y * s, b.x * s, b.y * s);
 
-	}
+    }
 
     class HilbertWithMandelbrot {
         Vec coordinate;
         int mandelbrotVal;
 
-        HilbertWithMandelbrot(Vec coordinate, int mandelbrotVal)
-        {
+        HilbertWithMandelbrot(Vec coordinate, int mandelbrotVal) {
             this.coordinate = coordinate;
             this.mandelbrotVal = mandelbrotVal;
         }

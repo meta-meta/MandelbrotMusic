@@ -280,19 +280,38 @@ public class Main extends PApplet {
         super.keyPressed(e);    //To change body of overridden methods use File | Settings | File Templates.
     }
 
+    int mX = 0, mY = 0;
+
+
     @Override
     public void draw() {
 
         if (redrawHilbertMandelbrot) {
-            background(0);
+
             if (renderAsHilbertCurve) {
                 generateAndDrawHilbertMandelbrot(getHilbertDMax());
+                redrawHilbertMandelbrot = false;
+                t = 0;
             } else {
-                Mandelbrot.draw(this, width, height, panX, panY, zoom, maxMandelbrotIters);
-            }
 
-            redrawHilbertMandelbrot = false;
-            t = 0;
+                int mXStep = width / 10, mYStep = height / 10;
+                strokeWeight(2);
+                Mandelbrot.drawRect(this, width, height, mX, mX + mXStep + 1, mY, mY + mYStep + 1, panX, panY, zoom, maxMandelbrotIters);
+
+                mX += mXStep;
+                if(mX >= width) {
+                    mX = 0;
+                    mY += mYStep;
+                    if(mY >= height) {
+                        mX = 0;
+                        mY = 0;
+                        redrawHilbertMandelbrot = false;
+                        t = 0;
+                    }
+                }
+
+//                Mandelbrot.draw(this, width, height, panX, panY, zoom, maxMandelbrotIters);
+            }
         }
 
         if (millis() - millisAtPlayed > delay) {

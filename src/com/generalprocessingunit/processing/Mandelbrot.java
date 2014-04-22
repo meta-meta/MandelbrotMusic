@@ -2,8 +2,6 @@ package com.generalprocessingunit.processing;
 
 import processing.core.PApplet;
 
-import java.util.List;
-
 /** This class is derived from Wikipedia's pseudocode.
  *
  *  <pre>
@@ -41,14 +39,22 @@ public class Mandelbrot {
      * @param maxIters
      */
     public static void draw(PApplet p5, int width, int height, double panX, double panY, double zoom, int maxIters) {
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                int iter = Mandelbrot.getValFromNormalizedCoordinates(x / (float) width, y / (float) height, panX, panY, zoom, maxIters);
+        drawRect(p5, width, height, 0, width, 0, height, panX, panY, zoom, maxIters);
+    }
 
-                p5.stroke(getHue(iter), 200, getBrightness(iter, maxIters));
-                p5.point(x, y);
+    public static void drawRect(PApplet p5, int totalWidth, int totalHeight, int x0, int x1, int y0, int y1, double panX, double panY, double zoom, int maxIters) {
+        for (int x = x0; x < x1; x++) {
+            for (int y = y0; y < y1; y++) {
+                drawPoint(p5, x / (double) totalWidth, y / (double) totalHeight, panX, panY, zoom, maxIters, x, y);
             }
         }
+    }
+
+    private static void drawPoint(PApplet p5, double normalizedX, double normalizedY, double panX, double panY, double zoom, int maxIters, int x, int y) {
+        int iter = Mandelbrot.getValFromNormalizedCoordinates(normalizedX, normalizedY, panX, panY, zoom, maxIters);
+
+        p5.stroke(getHue(iter), 200, getBrightness(iter, maxIters));
+        p5.point(x, y);
     }
 
     public static int getBrightness(int val, int maxIters) {

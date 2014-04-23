@@ -7,8 +7,8 @@ import java.util.Arrays;
 import java.util.List;
 
 public class MandelbrotMusic {
-    BaseFunctionality base;
-    PApplet p5;
+    private BaseFunctionality base;
+    private PApplet p5;
 
     /* Rendering state */
     private int maxMandelbrotIters = 1024;
@@ -51,14 +51,14 @@ public class MandelbrotMusic {
         setup();
     }
 
-    void setup() {
+    private void setup() {
         p5.background(0);
         p5.colorMode(PApplet.HSB);
         generateAndDrawHilbertMandelbrot(getHilbertDMax());
         setupCursors();
     }
 
-    void setupCursors() {
+    private void setupCursors() {
         for(int i = 1; i <= 20; i++) {
             cursors.add(new Cursor(i, i * 3, i));
         }
@@ -276,7 +276,7 @@ public class MandelbrotMusic {
         tickDelay += amount;
     }
 
-    class Cursor {
+    private class Cursor {
         int id;
         int d;
         int ticksPerRest;
@@ -343,7 +343,7 @@ public class MandelbrotMusic {
         }
     }
 
-    class HilbertWithMandelbrot {
+    private class HilbertWithMandelbrot {
         Vec coordinate;
         int mandelbrotVal;
 

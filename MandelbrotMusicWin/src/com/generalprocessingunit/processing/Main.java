@@ -131,6 +131,7 @@ public class Main extends PApplet implements BaseFunctionality {
         mandelbrotMusic.draw();
     }
 
+    @Override
     public void playNote(int cursor, int note, boolean rest) {
         log("note", note);
         sendOscMsg(String.format(OSC_INSTRUMENT_NOTE_ADDRESS, cursor), rest ? note : -10000);
@@ -146,16 +147,17 @@ public class Main extends PApplet implements BaseFunctionality {
         sendOscMsg(OSC_UNMUTE_ADDRESS, 0);
     }
 
+    @Override
     public void log(Object msg) {
         if(LOGGING) {
             System.out.println(msg);
         }
     }
+
+    @Override
     public void log(String label, Object msg) {
         if(LOGGING) {
             System.out.println(label + ": " + msg);
         }
     }
-
-
 }

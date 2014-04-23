@@ -9,35 +9,50 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-
 public class Main extends PApplet {
+    static final boolean LOGGING = false;
+
+    /* OSC */
     OSCPortOut oscPortOut;
-    public static final String OSC_INSTRUMENT_NOTE_ADDRESS = "/instrument/%s/note";
-    public static final String OSC_UNMUTE_ADDRESS = "/unmute";
+    static final String OSC_INSTRUMENT_NOTE_ADDRESS = "/instrument/%s/note";
+    static final String OSC_UNMUTE_ADDRESS = "/unmute";
 
-    static int maxMandelbrotIters = 1024;
-    static int hilbertN = 128; // hilbertN must be power of 2 in order to be square  \
 
-    static int getHilbertDMax() {
+    /* Rendering state */
+    int maxMandelbrotIters = 1024;
+    int hilbertN = 128; // hilbertN must be power of 2 in order to be square  \
+
+    int getHilbertDMax() {
         return hilbertN * hilbertN;
     }
 
     List<HilbertWithMandelbrot> hilbertCoordsAndMandelbrotVals = new ArrayList<>();
     double zoom = 1f;
     double panX = 0f, panY = 0f;
+    boolean redrawHilbertMandelbrot;
+    boolean renderAsHilbertCurve = true;
 
-    static boolean redrawHilbertMandelbrot;
-    static boolean renderAsHilbertCurve = true;
 
-    public static final int STROKE_WEIGHT_COEF = 1;
-    public static final int STROKE_COLOR_LINEARIZED_VIEW = 64;
-    public static final int STROKE_COLOR_HILBERT_VIEW = 64;
-    public static final int CURSOR_STROKE_COLOR_SEPARATION = 90;
+    /* Border size and color */
+    static final int STROKE_WEIGHT_COEF = 1;
+    static final int STROKE_COLOR_LINEARIZED_VIEW = 64;
+    static final int STROKE_COLOR_HILBERT_VIEW = 64;
+    float strokeWeightHilbert = 0;
+    float strokeWeightLinearized = 0;
+
+
+    /* Cursors */
+    List<Cursor> cursors = new ArrayList<>();
+    static final int CURSOR_STROKE_COLOR_SEPARATION = 64;
+    static final int CURSOR_ALPHA = 128;
 
     List<Integer> notes;
-    List<Cursor> cursors = new ArrayList<>();
-    float speed = 1;
+
+    int tick = 0;
+    int millisAtTick = 0;
+    float tickDelay = 100;
     boolean playing = false;
+
 
 
     public Main() {
@@ -55,7 +70,7 @@ public class Main extends PApplet {
         try {
             oscPortOut.send(msg);
         } catch (Exception e) {
-            System.out.println("Couldn't send");
+            log("error", "Couldn't send");
         }
     }
 
@@ -71,11 +86,14 @@ public class Main extends PApplet {
         background(0);
         colorMode(HSB);
 
-//        drawMandelbrot(this, 0, 0, width, height, panX, panY, zoom, maxMandelbrotIters);
         generateAndDrawHilbertMandelbrot(getHilbertDMax());
 
-        for(int i = 1; i <= 4; i++) {
-            cursors.add(new Cursor(i, i * 3, 100 ));
+        setupCursors();
+    }
+
+    private void setupCursors() {
+        for(int i = 1; i <= 20; i++) {
+            cursors.add(new Cursor(i, i * 3, i));
         }
     }
 
@@ -96,26 +114,28 @@ public class Main extends PApplet {
     }
 
     private void generateAndDrawHilbertMandelbrot(int dMax) {
-        List<HilbertWithMandelbrot> coordsWithVals = generateHilbertMandelbrot(dMax);
-        hilbertCoordsAndMandelbrotVals = coordsWithVals;
+        hilbertCoordsAndMandelbrotVals = generateHilbertMandelbrot(dMax);
 
-        drawHilbertMandelbrot(this, width / 2, height, coordsWithVals);
+        strokeWeightHilbert = getStrokeWeight(width / 2, hilbertCoordsAndMandelbrotVals.size());
+
+        drawHilbertMandelbrot(this, width / 2, height, hilbertCoordsAndMandelbrotVals, maxMandelbrotIters, hilbertN, strokeWeightHilbert);
 
         pushMatrix();
         translate(width / 2, 0);
-        drawLinearizedValues(this, width / 2, height, coordsWithVals);
+        drawLinearizedValues(this, width / 2, height, hilbertCoordsAndMandelbrotVals, maxMandelbrotIters);
         popMatrix();
 
         generateNoteList();  // TODO: only generate if maxMandelbrotIters increased
     }
 
-    private static void drawLinearizedValues(PApplet p5, int w, int h, List<HilbertWithMandelbrot> coordsWithVals) {
+    private void drawLinearizedValues(PApplet p5, int w, int h, List<HilbertWithMandelbrot> coordsWithVals, int maxIters) {
         int dMax = coordsWithVals.size();
         int s = getSideLengthForLinearizedMap(dMax, w, h);
+        strokeWeightLinearized = getStrokeWeight(s);
         for (int d = 0; d < dMax; d++) {
             p5.stroke(STROKE_COLOR_LINEARIZED_VIEW);
-            p5.strokeWeight(getStrokeWeight(s));
-            setFillColorForMandelbrotCoord(p5, coordsWithVals.get(d));
+            p5.strokeWeight(strokeWeightLinearized);
+            setFillColorForMandelbrotCoord(p5, coordsWithVals.get(d), maxIters);
 
             drawLinearizedMandelbrotCoord(p5, w, s, d);
         }
@@ -157,8 +177,8 @@ public class Main extends PApplet {
         return s;
     }
 
-    private static void setFillColorForMandelbrotCoord(PApplet p5, HilbertWithMandelbrot coordWithVal) {
-        p5.fill(Mandelbrot.getHue(coordWithVal.mandelbrotVal), 255, Mandelbrot.getBrightness(coordWithVal.mandelbrotVal, maxMandelbrotIters));
+    private static void setFillColorForMandelbrotCoord(PApplet p5, HilbertWithMandelbrot coordWithVal, int maxIters) {
+        p5.fill(Mandelbrot.getHue(coordWithVal.mandelbrotVal), 255, Mandelbrot.getBrightness(coordWithVal.mandelbrotVal, maxIters));
     }
 
     private static float getStrokeWeight(int w, int numVals) {
@@ -170,17 +190,17 @@ public class Main extends PApplet {
         return sideLength > 2 ? STROKE_WEIGHT_COEF * max(1, min(10, sideLength / 20f)) : 0;
     }
 
-    private static void drawHilbertMandelbrot(PApplet p5, int w, int h, List<HilbertWithMandelbrot> coordsWithVals) {
-        p5.strokeWeight(getStrokeWeight(w, coordsWithVals.size()));
+    private static void drawHilbertMandelbrot(PApplet p5, int w, int h, List<HilbertWithMandelbrot> coordsWithVals, int maxIters, int hilbertN, float strokeWeight) {
+        p5.strokeWeight(strokeWeight);
         p5.stroke(STROKE_COLOR_HILBERT_VIEW);
 
         for (int d = 0; d < coordsWithVals.size(); d++) {
-            setFillColorForMandelbrotCoord(p5, coordsWithVals.get(d));
-            drawHilbertCoordinate(p5, w, h, coordsWithVals.get(d).coordinate);
+            setFillColorForMandelbrotCoord(p5, coordsWithVals.get(d), maxIters);
+            drawHilbertCoordinate(p5, w, h, coordsWithVals.get(d).coordinate, hilbertN);
         }
     }
 
-    private static void drawHilbertCoordinate(PApplet p5, int w, int h, Vec hilbertCoord) {
+    private static void drawHilbertCoordinate(PApplet p5, int w, int h, Vec hilbertCoord, int hilbertN) {
         float scaleX = w / (float) hilbertN;
         float scaleY = h / (float) hilbertN;
         p5.rect((float) (hilbertCoord.x * scaleX), (float) (hilbertCoord.y * scaleY), scaleX, scaleY);
@@ -255,7 +275,7 @@ public class Main extends PApplet {
         }
 
         if (e.getKeyCode() == KeyEvent.VK_PERIOD) {
-            float inc = 0.1f;
+            float inc = 1f;
 
             if (e.isControlDown()) {
                 inc /= 10;
@@ -263,11 +283,11 @@ public class Main extends PApplet {
                 inc *= 10;
             }
 
-            speed += inc;
+            tickDelay = tickDelay - inc > 0 ? tickDelay - inc : tickDelay;
         }
 
         if (e.getKeyCode() == KeyEvent.VK_COMMA) {
-            float dec = 0.1f;
+            float dec = 1f;
 
             if (e.isControlDown()) {
                 dec /= 10;
@@ -275,14 +295,14 @@ public class Main extends PApplet {
                 dec *= 10;
             }
 
-            speed = speed - dec > 0 ? speed - dec : speed;
+            tickDelay += dec;
         }
 
-        System.out.println("zoom: " + zoom + " panX: " + panX + " panY: " + panY);
-        System.out.println("maxIters: " + maxMandelbrotIters);
+        log("zoom: " + zoom + " panX: " + panX + " panY: " + panY);
+        log("maxIters", maxMandelbrotIters);
 
 
-        super.keyPressed(e);    //To change body of overridden methods use File | Settings | File Templates.
+        super.keyPressed(e);
     }
 
     @Override
@@ -301,8 +321,13 @@ public class Main extends PApplet {
 
         if(playing) {
             sendOscMsg(OSC_UNMUTE_ADDRESS, 1);
-            for(Cursor c : cursors) {
-                c.draw(this);
+
+            if(millis() - millisAtTick > tickDelay) {
+                for(Cursor c : cursors) {
+                    c.draw(this);
+                }
+                tick++;
+                millisAtTick = millis();
             }
         } else {
             sendOscMsg(OSC_UNMUTE_ADDRESS, 0);
@@ -310,71 +335,82 @@ public class Main extends PApplet {
     }
 
     private void playNote(int cursor, int val) {
-        System.out.println("note: " + val);
+        log("note", val);
         sendOscMsg(String.format(OSC_INSTRUMENT_NOTE_ADDRESS, cursor), val == maxMandelbrotIters ? -100000 : notes.get(val % notes.size()));
+    }
+
+    private static void log(Object msg) {
+        if(LOGGING) {
+            System.out.println(msg);
+        }
+    }
+    private static void log(String label, Object msg) {
+        if(LOGGING) {
+            System.out.println(label + ": " + msg);
+        }
     }
 
     class Cursor {
         int id;
         int d;
-        int delay;
-        int millisAtPlayed = 0;
+        int ticksPerRest;
+        int ticksAtLastPlay = 0;
 
-        Cursor(int id, int delay) {
-            this(id, 0, delay);
+        Cursor(int id, int ticksPerRest) {
+            this(id, 0, ticksPerRest);
         }
 
-        Cursor(int id, int d, int delay) {
+        Cursor(int id, int d, int ticksPerRest) {
             this.id = id;
             this.d = d;
-            this.delay = delay;
+            this.ticksPerRest = ticksPerRest;
         }
 
         void draw(PApplet p5) {
-            if (millis() - millisAtPlayed < delay / speed) {
+            if (tick - ticksAtLastPlay < ticksPerRest) {
                 return;
             }
 
             int maxD = hilbertCoordsAndMandelbrotVals.size();
             int s = getSideLengthForLinearizedMap(maxD, width / 2, height);
 
+            // previous cursor position
+            erasePreviousCursor(p5, maxD, s);
+
             HilbertWithMandelbrot coordAndVal = hilbertCoordsAndMandelbrotVals.get(d % maxD);
             int val = coordAndVal.mandelbrotVal;
 
             playNote(id, val);
 
-            fill(255, 192);
-            strokeWeight(getStrokeWeight(width / 2, maxD));
+            blendMode(ADD);
+            fill(255, CURSOR_ALPHA);
+            strokeWeight(strokeWeightHilbert);
             stroke((CURSOR_STROKE_COLOR_SEPARATION * id) % 255, 255, 255);
-            drawHilbertCoordinate(p5, width / 2, height, coordAndVal.coordinate);
+            drawHilbertCoordinate(p5, width / 2, height, coordAndVal.coordinate, hilbertN);
 
             pushMatrix();
             translate(width / 2, 0);
-            strokeWeight(getStrokeWeight(s));
+            strokeWeight(strokeWeightLinearized);
             drawLinearizedMandelbrotCoord(p5, width / 2, s, d % maxD);
             popMatrix();
+            blendMode(REPLACE);
 
-            // previous cursor position
-            erasePreviousCursor(p5, maxD, s);
-
-            millisAtPlayed = millis();
+            ticksAtLastPlay = tick;
             d++;
         }
 
         private void erasePreviousCursor(PApplet p5, int maxD, int s) {
             int prevD = (maxD + d - 1) % maxD;
             HilbertWithMandelbrot prevCoordAndVal = hilbertCoordsAndMandelbrotVals.get(prevD);
-            int prevVal = prevCoordAndVal.mandelbrotVal;
-            Vec prevCoord = prevCoordAndVal.coordinate;
 
-            setFillColorForMandelbrotCoord(p5, prevCoordAndVal);
-            strokeWeight(getStrokeWeight(width / 2, maxD));
+            setFillColorForMandelbrotCoord(p5, prevCoordAndVal, maxMandelbrotIters);
+            strokeWeight(strokeWeightHilbert);
             stroke(STROKE_COLOR_HILBERT_VIEW);
-            drawHilbertCoordinate(p5, width / 2, height, prevCoord);
+            drawHilbertCoordinate(p5, width / 2, height, prevCoordAndVal.coordinate, hilbertN);
 
             pushMatrix();
             translate(width / 2, 0);
-            strokeWeight(getStrokeWeight(s));
+            strokeWeight(strokeWeightLinearized);
             stroke(STROKE_COLOR_LINEARIZED_VIEW);
             drawLinearizedMandelbrotCoord(p5, width / 2, s, prevD);
             popMatrix();

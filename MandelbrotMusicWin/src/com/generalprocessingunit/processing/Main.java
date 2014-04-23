@@ -16,7 +16,7 @@ public class Main extends PApplet implements BaseFunctionality {
     static final String OSC_INSTRUMENT_NOTE_ADDRESS = "/instrument/%s/note";
     static final String OSC_UNMUTE_ADDRESS = "/unmute";
 
-    MandelbrotMusic mandelbrotMusic;
+    MandelbrotMusicCore mm;
 
     public Main() {
         super();
@@ -46,57 +46,57 @@ public class Main extends PApplet implements BaseFunctionality {
 //		size(1050, 720, PApplet.OPENGL);
         size(displayWidth, displayHeight, PApplet.OPENGL);
 
-        mandelbrotMusic = new MandelbrotMusic(this, this);
+        mm = new MandelbrotMusicCore(this, this);
     }
 
     @Override
     public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-            mandelbrotMusic.togglePlaying();
+            mm.togglePlaying();
         }
 
         if (e.getKeyCode() == KeyEvent.VK_PAGE_UP) {
             if (e.isControlDown()) {
-                mandelbrotMusic.increaseHilbertN();
+                mm.increaseHilbertN();
             } else {
-                mandelbrotMusic.increaseZoom();
+                mm.increaseZoom();
             }
         }
 
         if (e.getKeyCode() == KeyEvent.VK_PAGE_DOWN) {
             if (e.isControlDown()) {
-                mandelbrotMusic.decreaseHilbertN();
+                mm.decreaseHilbertN();
             } else {
-                mandelbrotMusic.decreaseZoom();
+                mm.decreaseZoom();
             }
         }
 
         if (e.getKeyCode() == KeyEvent.VK_UP) {
-            mandelbrotMusic.panUp();
+            mm.panUp();
         }
 
         if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-            mandelbrotMusic.panDown();
+            mm.panDown();
         }
 
         if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-            mandelbrotMusic.panLeft();
+            mm.panLeft();
         }
 
         if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-            mandelbrotMusic.panRight();
+            mm.panRight();
         }
 
         if (e.getKeyCode() == KeyEvent.VK_HOME) {
-            mandelbrotMusic.decreaseMandelbrotIters();
+            mm.decreaseMandelbrotIters();
         }
 
         if (e.getKeyCode() == KeyEvent.VK_END) {
-            mandelbrotMusic.increaseMandelbrotIters();
+            mm.increaseMandelbrotIters();
         }
 
         if (e.getKeyCode() == KeyEvent.VK_H) {
-            mandelbrotMusic.toggleRenderAsHilbertCurve();
+            mm.toggleRenderAsHilbertCurve();
         }
 
         if (e.getKeyCode() == KeyEvent.VK_PERIOD) {
@@ -108,7 +108,7 @@ public class Main extends PApplet implements BaseFunctionality {
                 inc *= 10;
             }
 
-            mandelbrotMusic.increasePlaybackSpeed(inc);
+            mm.increasePlaybackSpeed(inc);
         }
 
         if (e.getKeyCode() == KeyEvent.VK_COMMA) {
@@ -120,7 +120,7 @@ public class Main extends PApplet implements BaseFunctionality {
                 dec *= 10;
             }
 
-            mandelbrotMusic.decreasePlaybackSpeed(dec);
+            mm.decreasePlaybackSpeed(dec);
         }
 
         super.keyPressed(e);
@@ -128,7 +128,7 @@ public class Main extends PApplet implements BaseFunctionality {
 
     @Override
     public void draw() {
-        mandelbrotMusic.draw();
+        mm.draw();
     }
 
     @Override

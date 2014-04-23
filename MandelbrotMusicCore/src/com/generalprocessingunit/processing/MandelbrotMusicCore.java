@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class MandelbrotMusic {
+public class MandelbrotMusicCore {
     private BaseFunctionality base;
     private PApplet p5;
 
@@ -45,7 +45,7 @@ public class MandelbrotMusic {
     private float tickDelay = 100;
     private boolean playing = false;
 
-    MandelbrotMusic(BaseFunctionality base, PApplet p5) {
+    public MandelbrotMusicCore(BaseFunctionality base, PApplet p5) {
         this.base = base;
         this.p5 = p5;
         setup();
@@ -182,7 +182,7 @@ public class MandelbrotMusic {
         return coordsWithVals;
     }
 
-    void draw() {
+    public void draw() {
         if (redrawHilbertMandelbrot) {
             p5.background(0);
             if (renderAsHilbertCurve) {
@@ -209,70 +209,70 @@ public class MandelbrotMusic {
         }
     }
 
-    boolean togglePlaying() {
+    public boolean togglePlaying() {
         return playing = !playing;
     }
 
-    boolean toggleRenderAsHilbertCurve() {
+    public boolean toggleRenderAsHilbertCurve() {
         redrawHilbertMandelbrot = true;
         return renderAsHilbertCurve = !renderAsHilbertCurve;
     }
 
-    void increaseHilbertN() {
+    public void increaseHilbertN() {
         hilbertN *= 2;
         redrawHilbertMandelbrot = true;
     }
 
-    void decreaseHilbertN() {
+    public void decreaseHilbertN() {
         hilbertN = hilbertN > 1 ? hilbertN / 2 : hilbertN;
         redrawHilbertMandelbrot = true;
     }
 
-    void decreaseMandelbrotIters() {
+    public void decreaseMandelbrotIters() {
         maxMandelbrotIters = maxMandelbrotIters > 2 ? maxMandelbrotIters / 2 : maxMandelbrotIters;
         redrawHilbertMandelbrot = true;
     }
 
-    void increaseMandelbrotIters() {
+    public void increaseMandelbrotIters() {
         maxMandelbrotIters = maxMandelbrotIters * 2;
         redrawHilbertMandelbrot = true;
     }
 
-    void increaseZoom() {
+    public void increaseZoom() {
         zoom *= 2;
         redrawHilbertMandelbrot = true;
     }
 
-    void decreaseZoom() {
+    public void decreaseZoom() {
         zoom = zoom > 1 ? zoom / 2 : zoom;
         redrawHilbertMandelbrot = true;
     }
 
-    void panUp() {
+    public void panUp() {
         panY += 0.1f / zoom;
         redrawHilbertMandelbrot = true;
     }
 
-    void panDown() {
+    public void panDown() {
         panY -= 0.1f / zoom;
         redrawHilbertMandelbrot = true;
     }
 
-    void panLeft() {
+    public void panLeft() {
         panX += 0.1f / zoom;
         redrawHilbertMandelbrot = true;
     }
 
-    void panRight() {
+    public void panRight() {
         panX -= 0.1f / zoom;
         redrawHilbertMandelbrot = true;
     }
 
-    void increasePlaybackSpeed(float amount) {
+    public void increasePlaybackSpeed(float amount) {
         tickDelay = tickDelay - amount > 0 ? tickDelay - amount : tickDelay;
     }
 
-    void decreasePlaybackSpeed(float amount) {
+    public void decreasePlaybackSpeed(float amount) {
         tickDelay += amount;
     }
 

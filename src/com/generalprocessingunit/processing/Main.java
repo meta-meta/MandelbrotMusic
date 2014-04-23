@@ -122,12 +122,14 @@ public class Main extends PApplet {
     }
 
     private static void drawLinearizedMandelbrotCoord(PApplet p5, int w, int s, int d) {
-        int x = d % (w / s);
-        int y = (d * s) / w;
+        int valsPerRow = w / s;
+
+        int x = d % valsPerRow;
+        int y = d / valsPerRow;
 
         // snake around instead of starting from the left for each row
         if(y % 2 == 1) {
-            x = (w / s) - (x+1);
+            x = valsPerRow - (x + 1);
         }
 
         p5.rect(x * s, y * s, s, s);

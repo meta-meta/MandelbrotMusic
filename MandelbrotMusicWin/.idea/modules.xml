@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/../../_Libraries/JavaOSC/modules/core/src/main/JavaOSC.iml" filepath="$PROJECT_DIR$/../../_Libraries/JavaOSC/modules/core/src/main/JavaOSC.iml" />
       <module fileurl="file://$PROJECT_DIR$/../_Libraries/JavaOSC/modules/core/src/main/JavaOSC.iml" filepath="$PROJECT_DIR$/../_Libraries/JavaOSC/modules/core/src/main/JavaOSC.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../MandelbrotMusicCore/MandelbrotMusicCore.iml" filepath="$PROJECT_DIR$/../MandelbrotMusicCore/MandelbrotMusicCore.iml" />
       <module fileurl="file://$PROJECT_DIR$/MandelbrotMusicWin.iml" filepath="$PROJECT_DIR$/MandelbrotMusicWin.iml" />
       <module fileurl="file://C:/Dev Tools/processing/core/core.iml" filepath="C:/Dev Tools/processing/core/core.iml" />
       <module fileurl="file://$PROJECT_DIR$/../_Libraries/JavaOSC/modules/core/src/main/main.iml" filepath="$PROJECT_DIR$/../_Libraries/JavaOSC/modules/core/src/main/main.iml" />

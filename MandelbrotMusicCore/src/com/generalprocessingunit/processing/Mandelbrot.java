@@ -2,8 +2,6 @@ package com.generalprocessingunit.processing;
 
 import processing.core.PApplet;
 
-import java.util.List;
-
 /** This class is derived from Wikipedia's pseudocode.
  *
  *  <pre>

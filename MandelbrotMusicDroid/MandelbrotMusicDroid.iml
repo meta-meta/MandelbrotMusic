@@ -15,8 +15,8 @@
     </content>
     <orderEntry type="jdk" jdkName="Android API 19 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="android-core" />
     <orderEntry type="module" module-name="MandelbrotMusicCore" />
+    <orderEntry type="module" module-name="processing-core" />
   </component>
 </module>
 

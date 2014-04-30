@@ -2,15 +2,15 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/../../_Libraries/JavaOSC/modules/core/src/main/JavaOSC.iml" filepath="$PROJECT_DIR$/../../_Libraries/JavaOSC/modules/core/src/main/JavaOSC.iml" />
       <module fileurl="file://$PROJECT_DIR$/../_Libraries/JavaOSC/modules/core/src/main/JavaOSC.iml" filepath="$PROJECT_DIR$/../_Libraries/JavaOSC/modules/core/src/main/JavaOSC.iml" />
       <module fileurl="file://D:/_Libraries/JavaOSC/modules/core/src/main/JavaOSC.iml" filepath="D:/_Libraries/JavaOSC/modules/core/src/main/JavaOSC.iml" />
       <module fileurl="file://$PROJECT_DIR$/../MandelbrotMusicCore/MandelbrotMusicCore.iml" filepath="$PROJECT_DIR$/../MandelbrotMusicCore/MandelbrotMusicCore.iml" />
+      <module fileurl="file://$PROJECT_DIR$/MandelbrotMusicDroid.iml" filepath="$PROJECT_DIR$/MandelbrotMusicDroid.iml" />
       <module fileurl="file://$PROJECT_DIR$/MandelbrotMusicWin.iml" filepath="$PROJECT_DIR$/MandelbrotMusicWin.iml" />
       <module fileurl="file://D:/_Libraries/processing-android/core/android-core.iml" filepath="D:/_Libraries/processing-android/core/android-core.iml" />
       <module fileurl="file://C:/Dev Tools/processing/core/core.iml" filepath="C:/Dev Tools/processing/core/core.iml" />
       <module fileurl="file://$PROJECT_DIR$/../_Libraries/JavaOSC/modules/core/src/main/main.iml" filepath="$PROJECT_DIR$/../_Libraries/JavaOSC/modules/core/src/main/main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../../_Libraries/processing/core/processing-core.iml" filepath="$PROJECT_DIR$/../../_Libraries/processing/core/processing-core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../_Libraries/processing-android/core/processing-core.iml" filepath="$PROJECT_DIR$/../../_Libraries/processing-android/core/processing-core.iml" />
       <module fileurl="file://$PROJECT_DIR$/../_Libraries/processing/core/processing-core.iml" filepath="$PROJECT_DIR$/../_Libraries/processing/core/processing-core.iml" />
       <module fileurl="file://D:/_Libraries/processing/core/processing-core.iml" filepath="D:/_Libraries/processing/core/processing-core.iml" />
     </modules>

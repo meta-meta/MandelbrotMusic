@@ -8,8 +8,8 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="processing-core" />
-    <orderEntry type="module" module-name="JavaOSC" />
     <orderEntry type="module" module-name="MandelbrotMusicCore" />
+    <orderEntry type="module" module-name="JavaOSC" />
   </component>
 </module>
 

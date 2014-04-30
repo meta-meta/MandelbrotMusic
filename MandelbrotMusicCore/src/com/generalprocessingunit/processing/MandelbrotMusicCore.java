@@ -59,7 +59,7 @@ public class MandelbrotMusicCore {
     }
 
     private void setupCursors() {
-        for(int i = 1; i <= 20; i++) {
+        for(int i = 1; i <= 10; i++) {
             cursors.add(new Cursor(i, i * 3, i));
         }
     }

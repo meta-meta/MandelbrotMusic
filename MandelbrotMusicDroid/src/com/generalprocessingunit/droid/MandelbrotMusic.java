@@ -5,9 +5,17 @@ import android.os.Looper;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
+import com.example.MandelbrotMusicDroid.R;
 import com.generalprocessingunit.processing.BaseFunctionality;
 import com.generalprocessingunit.processing.MandelbrotMusicCore;
+import org.puredata.android.io.AudioParameters;
+import org.puredata.android.io.PdAudio;
+import org.puredata.core.PdBase;
+import org.puredata.core.utils.IoUtils;
 import processing.core.PApplet;
+
+import java.io.File;
+import java.io.IOException;
 
 public class MandelbrotMusic extends PApplet implements BaseFunctionality {
 
@@ -18,6 +26,43 @@ public class MandelbrotMusic extends PApplet implements BaseFunctionality {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        try {
+            initPd();
+        } catch (IOException e) {
+            Log.e("pd", "pd failed to init: "+e.getCause());
+            exit();
+        }
+    }
+
+    private void initPd() throws IOException {
+        AudioParameters.init(this);
+        int srate = Math.max(44100, AudioParameters.suggestSampleRate());
+        PdAudio.initAudio(srate, 0, 2, 1, true);
+
+        File dir = getFilesDir();
+        File patchFile = new File(dir, "Mandelbrot.pd");
+        IoUtils.extractZipResource(getResources().openRawResource(R.raw.patch), dir, true);
+        PdBase.openPatch(patchFile.getAbsolutePath());
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        PdAudio.startAudio(this);
+    }
+
+    @Override
+    protected void onStop() {
+        PdAudio.stopAudio();
+        super.onStop();
+    }
+
+    @Override
+    public void onDestroy() {
+        PdAudio.release();
+        PdBase.release();
+        super.onDestroy();
     }
 
     @Override
@@ -26,7 +71,7 @@ public class MandelbrotMusic extends PApplet implements BaseFunctionality {
         orientation(LANDSCAPE);
 
         mm = new MandelbrotMusicCore(this, this);
-
+        mm.togglePlaying();
 
         Looper.prepare();
         mScaleDetector = new ScaleGestureDetector(getApplicationContext(), new ScaleListener());
@@ -128,16 +173,19 @@ public class MandelbrotMusic extends PApplet implements BaseFunctionality {
 
     @Override
     public void playNote(int cursor, int note, boolean rest) {
-
+        PdBase.sendList("instrument", cursor, "volume", rest ? 0 : 80);
+        PdBase.sendList("instrument", cursor, "pan", (cursor % 2 == 0) ? -1 : 1 );
+        PdBase.sendList("instrument", cursor, "oscillator", cursor % 3);
+        PdBase.sendList("instrument", cursor, "note", note + 30);
     }
 
     @Override
     public void mute() {
-
+        PdBase.sendFloat("volume", 0f);
     }
 
     @Override
     public void unmute() {
-
+        PdBase.sendFloat("volume", 95f);
     }
 }

@@ -1,18 +1,15 @@
 package com.generalprocessingunit.processing;
 
-import com.illposed.osc.OSCMessage;
-import com.illposed.osc.OSCPortOut;
+import com.generalprocessingunit.io.OSC;
 import processing.core.PApplet;
 
 import java.awt.event.KeyEvent;
-import java.util.Arrays;
 
 
 public class Main extends PApplet implements BaseFunctionality {
     static final boolean LOGGING = false;
 
     /* OSC */
-    OSCPortOut oscPortOut;
     static final String OSC_INSTRUMENT_NOTE_ADDRESS = "/instrument/%s/note";
     static final String OSC_UNMUTE_ADDRESS = "/unmute";
 
@@ -20,21 +17,6 @@ public class Main extends PApplet implements BaseFunctionality {
 
     public Main() {
         super();
-
-        try {
-            oscPortOut = new OSCPortOut();
-        } catch (Exception e) {
-            System.out.print(e);
-        }
-    }
-
-    private void sendOscMsg(String address, int note) {
-        OSCMessage msg = new OSCMessage(address, Arrays.asList((Object) note));
-        try {
-            oscPortOut.send(msg);
-        } catch (Exception e) {
-            log("error", "Couldn't send");
-        }
     }
 
     public static void main(String[] args) {
@@ -134,17 +116,17 @@ public class Main extends PApplet implements BaseFunctionality {
     @Override
     public void playNote(int cursor, int note, boolean rest) {
         log("note", note);
-        sendOscMsg(String.format(OSC_INSTRUMENT_NOTE_ADDRESS, cursor), rest ? note : -10000);
+        OSC.sendMsg(String.format(OSC_INSTRUMENT_NOTE_ADDRESS, cursor), rest ? -10000 : note);
     }
 
     @Override
     public void unmute() {
-        sendOscMsg(OSC_UNMUTE_ADDRESS, 1);
+        OSC.sendMsg(OSC_UNMUTE_ADDRESS, 1);
     }
 
     @Override
     public void mute() {
-        sendOscMsg(OSC_UNMUTE_ADDRESS, 0);
+        OSC.sendMsg(OSC_UNMUTE_ADDRESS, 0);
     }
 
     @Override

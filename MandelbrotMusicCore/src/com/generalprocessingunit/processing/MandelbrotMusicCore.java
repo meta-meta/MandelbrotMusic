@@ -32,10 +32,10 @@ public class MandelbrotMusicCore {
     private float strokeWeightHilbert = 0;
     private float strokeWeightLinearized = 0;
 
-
     /* Cursors */
-    private List<Cursor> cursors = new ArrayList<>();
-    private static final int CURSOR_STROKE_COLOR_SEPARATION = 64;
+    public static int numCursors = 3;
+    private List<Cursor> cursors;
+    private static final int CURSOR_STROKE_COLOR_SEPARATION = 20;
     private static final int CURSOR_ALPHA = 128;
 
     private List<Integer> notes;
@@ -59,8 +59,13 @@ public class MandelbrotMusicCore {
     }
 
     private void setupCursors() {
-        for(int i = 1; i <= 10; i++) {
+        cursors = new ArrayList<>();
+        for(int i = 1; i <= numCursors; i++) {
             cursors.add(new Cursor(i, i * 3, i));
+        }
+
+        for (int i = 0; i < 10; i++) {
+            base.playNote(i + 1, 127, true);
         }
     }
 
@@ -246,6 +251,16 @@ public class MandelbrotMusicCore {
     public void decreaseZoom() {
         zoom = zoom > 1 ? zoom / 2 : zoom;
         redrawHilbertMandelbrot = true;
+    }
+
+    public void increaseNumCursors() {
+        numCursors = PApplet.min(numCursors + 1, 10);
+        setupCursors();
+    }
+
+    public void decreaseNumCursors() {
+        numCursors = PApplet.max(numCursors - 1, 0);
+        setupCursors();
     }
 
     public void panUp() {

@@ -105,6 +105,14 @@ public class Main extends PApplet implements BaseFunctionality {
             mm.decreasePlaybackSpeed(dec);
         }
 
+        if(e.getKeyCode() == KeyEvent.VK_OPEN_BRACKET) {
+            mm.decreaseNumCursors();
+        }
+
+        if(e.getKeyCode() == KeyEvent.VK_CLOSE_BRACKET) {
+            mm.increaseNumCursors();
+        }
+
         super.keyPressed(e);
     }
 
